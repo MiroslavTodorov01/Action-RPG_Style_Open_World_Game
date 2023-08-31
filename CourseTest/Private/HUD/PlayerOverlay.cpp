@@ -33,3 +33,11 @@ void UPlayerOverlay::SetSouls(int32 SoulsAmount)
 		SoulsText->SetText(FText::FromString(FString::Printf(TEXT("%d"), SoulsAmount)));
 	}
 }
+
+void UPlayerOverlay::SetHealingPotions(int32 HealingPotionsAmount)
+{
+	if (HealingPotionsText)
+	{
+		HealingPotionsText->SetText(FText::FromString(FString::Printf(TEXT("%d"), HealingPotionsAmount)));
+	}
+}

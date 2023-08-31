@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Items/Item.h"
-#include "Treasure.generated.h"
+#include "Soul.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class COURSETEST_API ATreasure : public AItem
+class COURSETEST_API ASoul : public AItem
 {
 	GENERATED_BODY()
 
@@ -19,9 +19,11 @@ protected:
 
 private:
 
-	UPROPERTY(EditDefaultsOnly)
-	int32 GoldValue;
+	UPROPERTY(EditAnywhere)
+	int32 SoulValue;
 
 public:
-	FORCEINLINE int32 GetGoldValue() const { return GoldValue; };
+
+	FORCEINLINE int32 GetSoulValue() const { return SoulValue; };
+	FORCEINLINE void SetSoulValue(int32 NewSoulValue) { SoulValue = NewSoulValue; };
 };

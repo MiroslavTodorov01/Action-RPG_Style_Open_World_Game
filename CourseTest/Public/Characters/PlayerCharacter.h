@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Characters/CharacterTypes.h"
 #include "Characters/BaseCharacter.h"
+#include "Interfaces/PickupInterface.h"
 #include "PlayerCharacter.generated.h"
 
 class UGroomComponent;
@@ -14,7 +15,7 @@ class UAnimMontage;
 class UPlayerOverlay;
 
 UCLASS()
-class COURSETEST_API APlayerCharacter : public ABaseCharacter
+class COURSETEST_API APlayerCharacter : public ABaseCharacter, public IPickupInterface
 {
 	GENERATED_BODY()
 
@@ -30,12 +31,15 @@ protected:
 
 	void InitializePlayerOverlay();
 
-	UFUNCTION(BlueprintCallable)
-	void WeaponAttachToSocket();
-
 	virtual void EnableInputFromAnimation() override;
 	virtual bool CanAttack() override;
 	virtual void Die() override;
+
+	UFUNCTION(BlueprintCallable)
+	void DodgeEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void WeaponAttachToSocket();
 
 	UFUNCTION(BlueprintCallable)
 	void HitReactEnd();
@@ -44,8 +48,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SetItem(AItem* item);
+	virtual void SetOverlapingItem(class AItem* AItem) override;
 	bool IfItemIsAttached() const;
+	virtual void AddHealingPotion() override;
+	virtual void AddGold(class ATreasure* Treasure) override;
+	virtual void AddSouls(class ASoul* Soul) override;
 
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; };
 	FORCEINLINE EActionState GetActionState() const { return ActionState; };
@@ -92,6 +99,7 @@ private:
 	
 	virtual void AttackEnd() override;
 
+	/* Input */
 	void MoveForwardBackward(float Value);
 	void MoveLeftRight(float Value);
 	void Turn(float Value);
@@ -99,7 +107,9 @@ private:
 	void Walk();
 	void DisableWalk();
 	void Jump();
-	
+	void Dodge();
+	void Heal();
+
 	void Dash();
 	void CalculateDash();
 	void PickUp();

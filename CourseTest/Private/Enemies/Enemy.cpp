@@ -5,6 +5,8 @@
 #include "Perception/PawnSensingComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Weapons/Weapon.h"
+#include "Kismet/GameplayStatics.h"
+#include "Pickable/Soul.h"
 
 AEnemy::AEnemy()
 {
@@ -292,6 +294,20 @@ void AEnemy::Die()
 	HealthBar->SetVisibility(false);
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	SetWeaponCollision(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	FVector SpawnLocation = GetActorLocation();
+	SpawnLocation.Z += 40.f;
+
+	if (SoulClass)
+	{
+		ASoul* Soul = GetWorld()->SpawnActor<ASoul>(SoulClass, SpawnLocation, GetActorRotation());
+
+		if (Soul)
+		{
+			Soul->SetSoulValue(SoulValue);
+		}
+	}
 }
 
 bool AEnemy::IsOutsideCombatRadius()

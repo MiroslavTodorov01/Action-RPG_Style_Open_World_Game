@@ -4,9 +4,10 @@
 #include "Items/Item.h"
 #include "Kismet/GameplayStatics.h"
 #include "CourseTest/DrawMacro.h"
-#include "Characters/PlayerCharacter.h"
+#include "Interfaces/PickupInterface.h"
 #include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AItem::AItem()
@@ -89,28 +90,39 @@ void AItem::SetNiagaraActivate(bool State)
 	}
 }
 
+void AItem::SpawnPickupEffect()
+{
+	if (PickUpEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickUpEffect, GetActorLocation());
+	}
+}
+
+void AItem::PlayPickupSound()
+{
+	if (PickUpSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickUpSound, GetActorLocation());
+	}
+}
+
 void AItem::OverlapBegin(UPrimitiveComponent* ComponentOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult)
 {
-	APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor);
+	IPickupInterface* PickupInterface = Cast<IPickupInterface>(OtherActor);
 
-	if (player && !player->IfItemIsAttached())
+	if (PickupInterface)
 	{
-		player->SetItem(this);
+		PickupInterface->SetOverlapingItem(this);
 	}
 }
 
 void AItem::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, FString("Actor overlaps end"));
-	}
+	IPickupInterface* PickupInterface = Cast<IPickupInterface>(OtherActor);
 
-	APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor);
-
-	if (player)
+	if (PickupInterface)
 	{
-		player->SetItem(nullptr);
+		PickupInterface->SetOverlapingItem(nullptr);
 	}
 }
 

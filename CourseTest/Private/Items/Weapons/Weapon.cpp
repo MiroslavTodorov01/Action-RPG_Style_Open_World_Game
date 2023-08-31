@@ -46,10 +46,7 @@ void AWeapon::Equip(USceneComponent* Component, FName SocketName, AActor* NewOwn
 
 	AttachToComponent(Component, AttachmentRules, SocketName);
 
-	if (PickSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, PickSound, GetActorLocation());
-	}
+	PlayPickupSound();
 }
 
 void AWeapon::SetWeaponOwner(AActor* NewOwner, APawn* NewInstigator)

@@ -2,28 +2,19 @@
 
 
 #include "Pickable/Treasure.h"
-#include "Characters/PlayerCharacter.h"
-#include "Kismet/GameplayStatics.h"
-#include "Sound/SoundBase.h"
 #include "Components/AttributeComponent.h"
-#include "HUD/PlayerOverlay.h"
+#include "Interfaces/PickupInterface.h"
 
 void ATreasure::OverlapBegin(UPrimitiveComponent* ComponentOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult)
 {
 
-	APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor);
+	IPickupInterface* PickupInterface = Cast<IPickupInterface>(OtherActor);
 
-	if (player)
+	if (PickupInterface)
 	{
-		if (PickSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickSound, GetActorLocation());
+		PickupInterface->AddGold(this);
 
-			int32 CurrentGoldAmount = player->GetAttributeComponent()->AddGold(GoldValue);
-
-			player->GetPlayerOverlay()->SetGold(CurrentGoldAmount);
-		}
-
+		PlayPickupSound();
 		Destroy();
 	}
 }

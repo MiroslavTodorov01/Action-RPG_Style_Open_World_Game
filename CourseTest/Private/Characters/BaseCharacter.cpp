@@ -176,6 +176,14 @@ int32 ABaseCharacter::PlayDeathMontage()
 	return IndexSection;
 }
 
+void ABaseCharacter::PlayeDodgeMontage()
+{
+	if (DodgeMontage)
+	{
+		PlaySectionFromMontage(DodgeMontage, FName("Dodge1"));
+	}
+}
+
 FName ABaseCharacter::GetSectionOnHitCorespondingToTheta(double Theta)
 {
 	if (Theta >= -45.f && Theta < 45.f)

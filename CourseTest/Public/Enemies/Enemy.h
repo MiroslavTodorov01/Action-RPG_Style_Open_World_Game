@@ -43,11 +43,17 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AWeapon> WeaponClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ASoul> SoulClass;
+
 	UPROPERTY(VisibleAnywhere)
 	class UPawnSensingComponent* SencingComponent;
 
 	UPROPERTY(EditDefaultsonly)
 	class UHealthBarComponent* HealthBar;
+
+	UPROPERTY(EditAnywhere)
+	int32 SoulValue;
 
 	void ShowHealthBar();
 

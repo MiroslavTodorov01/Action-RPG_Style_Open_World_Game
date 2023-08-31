@@ -4,24 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "Items/Item.h"
-#include "Treasure.generated.h"
+#include "HealingPotion.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class COURSETEST_API ATreasure : public AItem
+class COURSETEST_API AHealingPotion : public AItem
 {
 	GENERATED_BODY()
-
+	
 protected:
 	virtual void OverlapBegin(UPrimitiveComponent* ComponentOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult) override;
 
 private:
-
-	UPROPERTY(EditDefaultsOnly)
-	int32 GoldValue;
+	UPROPERTY(EditAnywhere)
+	float HealAmount;
 
 public:
-	FORCEINLINE int32 GetGoldValue() const { return GoldValue; };
+	FORCEINLINE float GetHealAmount() const { return HealAmount; };
+	FORCEINLINE void SetHealAmount(float Value) { HealAmount = Value; };
 };

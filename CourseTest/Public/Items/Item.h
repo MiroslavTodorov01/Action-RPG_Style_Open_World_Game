@@ -20,7 +20,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	class USoundBase* PickSound;
+	class USoundBase* PickUpSound;
 
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* SphereCollision;
@@ -30,6 +30,21 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* root;
+	
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* PickUpEffect;
+
+	void SpawnPickupEffect();
+	void PlayPickupSound();
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IfIsPickedUp;
+
+	UFUNCTION()
+	virtual void OverlapBegin(UPrimitiveComponent* ComponentOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:	
 	// Called every frame
@@ -60,14 +75,4 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float RotationValue = 10.f;
-
-protected:
-	UFUNCTION()
-	virtual void OverlapBegin(UPrimitiveComponent* ComponentOverlap ,AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-	virtual void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UPROPERTY(BlueprintReadOnly)
-	bool IfIsPickedUp;
 };

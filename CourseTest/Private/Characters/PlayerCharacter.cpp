@@ -15,6 +15,8 @@
 #include "HUD/PlayerHUD.h"
 #include "HUD/PlayerOverlay.h"
 #include "Components/AttributeComponent.h"
+#include "Pickable/Treasure.h"
+#include "Pickable/Soul.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -79,6 +81,7 @@ void APlayerCharacter::InitializePlayerOverlay()
 				PlayerOverlay->SetStaminaBarPercentage(GetCurrentStaminaPercentage());
 				PlayerOverlay->SetGold(0.f);
 				PlayerOverlay->SetSouls(0.f);
+				PlayerOverlay->SetHealingPotions(0.f);
 			}
 		}
 	}
@@ -89,6 +92,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (Attributes && PlayerOverlay)
+	{
+		if (Attributes->GetStamina() != Attributes->GetMaxStamina())
+		{
+			Attributes->RegenStamina(DeltaTime);
+		}
+		
+		PlayerOverlay->SetStaminaBarPercentage(GetCurrentStaminaPercentage());
+	}
 }
 
 // Called to bind functionality to input
@@ -97,28 +109,20 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);	
 
 	PlayerInputComponent->BindAxis(TEXT("Forward/Backward"), this, &APlayerCharacter::MoveForwardBackward);
-
 	PlayerInputComponent->BindAxis(TEXT("MoveLeft/Right"), this, &APlayerCharacter::MoveLeftRight);
-
-	PlayerInputComponent->BindAction(TEXT("Walk"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Walk);
-
-	PlayerInputComponent->BindAction(TEXT("Walk"), EInputEvent::IE_Released, this, &APlayerCharacter::DisableWalk);
-
 	PlayerInputComponent->BindAxis(TEXT("LookLeft/Right"), this, &APlayerCharacter::Turn);
-
 	PlayerInputComponent->BindAxis(TEXT("LookUp/Down"), this, &APlayerCharacter::LookUpDown);
 
+	PlayerInputComponent->BindAction(TEXT("Walk"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Walk);
+	PlayerInputComponent->BindAction(TEXT("Walk"), EInputEvent::IE_Released, this, &APlayerCharacter::DisableWalk);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Jump);
-
 	PlayerInputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Dash);
-
 	PlayerInputComponent->BindAction(TEXT("PickUpItems"), IE_Pressed, this, &APlayerCharacter::PickUp);
-
 	PlayerInputComponent->BindAction(TEXT("Attack"), IE_Pressed, this, &APlayerCharacter::Attack);
-
 	PlayerInputComponent->BindAction(TEXT("HeavyAttack"), IE_Pressed, this, &APlayerCharacter::HeavyAttack);
-
 	PlayerInputComponent->BindAction(TEXT("Equipt/Unequipt"), IE_Pressed, this, &APlayerCharacter::EquiptOrUnequipt);
+	PlayerInputComponent->BindAction(TEXT("Dodge"), IE_Pressed, this, &APlayerCharacter::Dodge);
+	PlayerInputComponent->BindAction(TEXT("Heal"), IE_Pressed, this, &APlayerCharacter::Heal);
 }
 
 void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
@@ -146,6 +150,11 @@ void APlayerCharacter::Die()
 	ActionState = EActionState::EAS_Dead;
 }
 
+void APlayerCharacter::DodgeEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	HandleDamage(DamageAmount);
@@ -158,14 +167,44 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	return DamageAmount;
 }
 
-void APlayerCharacter::SetItem(AItem* item)
+void APlayerCharacter::SetOverlapingItem(AItem* AItem)
 {
-	Item = item;
+	this->Item = AItem;
 }
 
 bool APlayerCharacter::IfItemIsAttached() const
 {
 	return Item ? true : false;
+}
+
+void APlayerCharacter::AddHealingPotion()
+{
+	if (Attributes && PlayerOverlay)
+	{
+		Attributes->AddHealingPotion(1);
+
+		PlayerOverlay->SetHealingPotions(Attributes->GetHealingPotions());
+	}
+}
+
+void APlayerCharacter::AddGold(ATreasure* Treasure)
+{
+	if (Attributes && Treasure && PlayerOverlay)
+	{
+		Attributes->AddGold(Treasure->GetGoldValue());
+
+		PlayerOverlay->SetGold(Attributes->GetGold());
+	}
+}
+
+void APlayerCharacter::AddSouls(ASoul* Soul)
+{
+	if (Attributes && Soul && PlayerOverlay)
+	{
+		Attributes->AddSouls(Soul->GetSoulValue());
+
+		PlayerOverlay->SetSouls(Attributes->GetSouls());
+	}
 }
 
 void APlayerCharacter::AttackEnd()
@@ -176,8 +215,6 @@ void APlayerCharacter::AttackEnd()
 	{
 		CombatTarget = nullptr;
 	}
-
-	//SetWeaponCollision(ECollisionEnabled::NoCollision);
 }
 
 void APlayerCharacter::MoveForwardBackward(float Value)
@@ -250,6 +287,38 @@ void APlayerCharacter::Jump()
 	{
 		GetCharacterMovement()->DoJump(false);
 	}
+}
+
+void APlayerCharacter::Dodge()
+{
+	if (ActionState != EActionState::EAS_Unoccupied || !Attributes)
+	{
+		return;
+	}
+
+	if (!(Attributes->IfHaveEnoughStamina(Attributes->GetDodgeStaminaConst())))
+	{
+		return;
+	}
+
+	ActionState = EActionState::EAS_Dodge;
+
+	PlayeDodgeMontage();
+
+	Attributes->DecreasStamina(Attributes->GetDodgeStaminaConst());
+}
+
+void APlayerCharacter::Heal()
+{
+	if (!Attributes || !PlayerOverlay || !Attributes->IfHaveHealingPotions())
+	{
+		return;
+	}
+
+	Attributes->UseHealingPotion();
+
+	PlayerOverlay->SetHealingPotions(Attributes->GetHealingPotions());
+	PlayerOverlay->SetHealthBarPercentage(Attributes->CalculatePercentageOfHealth());
 }
 
 void APlayerCharacter::Dash() 

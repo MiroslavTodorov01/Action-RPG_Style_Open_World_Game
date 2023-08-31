@@ -15,7 +15,8 @@ enum class EActionState : uint8
 	EAS_Dead UMETA(DisplayName = "Dead"),
 	EAS_HitReact UMETA(DisplayName = "HitReact"),
 	EAS_Attacking UMETA(DisplayName = "Attacking"),
-	EAS_EquipOrNot UMETA(DisplayName = "EquipOrNot")
+	EAS_EquipOrNot UMETA(DisplayName = "EquipOrNot"),
+	EAS_Dodge UMETA(DisplayName = "Dodge")
 };
 
 UENUM(BlueprintType)

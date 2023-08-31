@@ -31,9 +31,10 @@ public:
 	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return Attributes; };
 	FORCEINLINE void SetCombatTarget(AActor* Target) { CombatTarget = Target; };
 	FORCEINLINE TEnumAsByte<EDeathState> GetDeathState() const { return DeathState.GetValue(); };
-				
+
 protected:
 	
+	UPROPERTY(BlueprintReadOnly)
 	TEnumAsByte<EDeathState> DeathState;
 
 	UPROPERTY(VisibleAnywhere)
@@ -70,6 +71,7 @@ protected:
 	void PlaySectionFromMontage(UAnimMontage* Montage, const FName& SectionName);
 	virtual int32 PlayAttackMontage();
 	virtual int32 PlayDeathMontage();
+	virtual void PlayeDodgeMontage();
 	int32 PlayHitReatctionMontage(const FName& SectionToPlay);
 	void PlayHitSound(const FVector& ImpactPoint);
 	void SpawnHitPatricles(const FVector& ImpactPoint);
@@ -97,6 +99,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* DodgeMontage;
 
 	UPROPERTY(EditDefaultsOnly)
 	class USoundBase* HitFleshSound;
